@@ -16,12 +16,12 @@ namespace MovieApp.DataContext.Context
         {
         }
 
-        public DbSet<User> Userss { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
         public DbSet<Movie> Movies { get; set; } = null!;
         public DbSet<Genre> Genres { get; set; } = null!;
         public DbSet<MovieGenre> MovieGenres { get; set; } = null!;
         public DbSet<Rating> Ratings { get; set; } = null!;
-        public DbSet<Favorite> Favoritess { get; set; } = null!;
+        public DbSet<Favorite> Favorites { get; set; } = null!;
         public DbSet<ViewHistory> ViewHistory { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

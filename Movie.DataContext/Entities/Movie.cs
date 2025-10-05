@@ -14,6 +14,7 @@ namespace MovieApp.DataContext.Entities
         public string Description { get; set; } = string.Empty;
         public int ReleaseYear { get; set; }
         public string? PosterUrl { get; set; }
+        public string Director { get; set; } = string.Empty;
         public double AverageRating { get; set; }
 
         // Kapcsolatok

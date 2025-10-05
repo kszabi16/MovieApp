@@ -6,6 +6,17 @@ using System.Threading.Tasks;
 
 namespace MovieApp.DataContext.Dtos
 {
+    public class UserStatisticsDto
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+
+        public int TotalViews { get; set; }
+        public int TotalRatings { get; set; }
+        public int TotalFavorites { get; set; }
+    }
+
     public class UserDto
     {
         public int Id { get; set; }
@@ -30,7 +41,10 @@ namespace MovieApp.DataContext.Dtos
 
     public class AuthResponseDto
     {
-        public string Token { get; set; } = string.Empty;
-        public UserDto User { get; set; } = null!;
+        public string Token { get; set; }
+        public string Email { get; set; }
+        public string Username { get; set; }
+        public List<string> Roles { get; set; }
+        public UserDto User { get; set; } 
     }
 }
