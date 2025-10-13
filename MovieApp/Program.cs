@@ -16,6 +16,8 @@ builder.Services.AddScoped<IViewHistoryService, ViewHistoryService>();
 builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 // JWT config
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -77,7 +79,16 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<MovieAppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MovieAppContext")));
+builder.Services.AddDbContext<MovieAppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("MovieAppContext"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+        }));
 
 // AutoMapper configuration
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutomapperProfile>());
@@ -94,6 +105,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

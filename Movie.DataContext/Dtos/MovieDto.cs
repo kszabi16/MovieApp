@@ -25,6 +25,7 @@ namespace MovieApp.DataContext.Dtos
         public string Description { get; set; } = string.Empty;
         public int ReleaseYear { get; set; }
         public string? PosterUrl { get; set; }
+        public string Director { get; set; } = string.Empty;
 
         public List<int> GenreIds { get; set; } = new();
     }

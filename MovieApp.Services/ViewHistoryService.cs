@@ -44,6 +44,8 @@ public class ViewHistoryService : IViewHistoryService
         _context.ViewHistory.Add(view);
         await _context.SaveChangesAsync();
 
+        await _context.Entry(view).Reference(f => f.Movie).LoadAsync();
+
         return _mapper.Map<ViewHistoryDto>(view);
     }
 }

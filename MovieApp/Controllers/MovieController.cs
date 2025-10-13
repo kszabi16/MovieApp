@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.DataContext.Dtos;
 
 [ApiController]
@@ -12,13 +13,15 @@ public class MovieController : ControllerBase
         _movieService = movieService;
     }
 
-    [HttpGet]
+    [AllowAnonymous]
+    [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<MovieDto>>> GetAll()
     {
         var movies = await _movieService.GetAllAsync();
         return Ok(movies);
     }
 
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<ActionResult<MovieDto>> GetById(int id)
     {
@@ -29,6 +32,7 @@ public class MovieController : ControllerBase
         return Ok(movie);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("create")]
     public async Task<ActionResult<MovieDto>> Create([FromBody] MovieCreateDto dto)
     {
@@ -36,6 +40,7 @@ public class MovieController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<ActionResult<MovieDto>> Update(int id, [FromBody] MovieCreateDto dto)
     {
@@ -46,6 +51,7 @@ public class MovieController : ControllerBase
         return Ok(updated);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {

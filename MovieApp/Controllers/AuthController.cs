@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.DataContext.Dtos;
 using MovieApp.Services;
 using System;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MovieApp.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase

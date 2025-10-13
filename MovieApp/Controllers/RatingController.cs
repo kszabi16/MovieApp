@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.DataContext.Dtos;
 
 [ApiController]
@@ -12,6 +13,7 @@ public class RatingController : ControllerBase
         _ratingService = ratingService;
     }
 
+    [AllowAnonymous]
     [HttpGet("movie/{movieId}")]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetByMovie(int movieId)
     {
@@ -19,6 +21,7 @@ public class RatingController : ControllerBase
         return Ok(ratings);
     }
 
+    [Authorize]
     [HttpGet("user/{userId}")]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetByUser(int userId)
     {
@@ -26,6 +29,7 @@ public class RatingController : ControllerBase
         return Ok(ratings);
     }
 
+    [Authorize] 
     [HttpPost("{userId}")]
     public async Task<ActionResult<RatingDto>> AddOrUpdate(int userId, [FromBody] CreateRatingDto dto)
     {

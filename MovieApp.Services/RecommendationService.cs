@@ -28,9 +28,9 @@ namespace MovieApp.Services
                 .AsNoTracking()
                 .Select(r => new MovieRatingData
                 {
-                    UserId = (float)r.UserId,
-                    MovieId = (float)r.MovieId,
-                    Label = (float)r.Score
+                    UserId = (uint)r.UserId,   // uint típust használjunk
+                    MovieId = (uint)r.MovieId,
+                    Score = (float)r.Score
                 })
                 .ToListAsync();
 
@@ -38,19 +38,25 @@ namespace MovieApp.Services
                 return new List<MovieDto>();
 
             // Adatok betöltése ML.NET-be
-            var trainingData = _mlContext.Data.LoadFromEnumerable(ratings);
+            var dataView = _mlContext.Data.LoadFromEnumerable(ratings);
 
-            // Modell tanítása (Matrix Factorization)
-            var options = new Microsoft.ML.Trainers.MatrixFactorizationTrainer.Options
-            {
-                MatrixColumnIndexColumnName = nameof(MovieRatingData.UserId),
-                MatrixRowIndexColumnName = nameof(MovieRatingData.MovieId),
-                LabelColumnName = nameof(MovieRatingData.Label),
-                NumberOfIterations = 40,
-                ApproximationRank = 100
-            };
+            // Pipeline: kulcs-konverzió + tanító algoritmus
+            var pipeline = _mlContext.Transforms.Conversion
+                .MapValueToKey(outputColumnName: "userIdEncoded", inputColumnName: nameof(MovieRatingData.UserId))
+                .Append(_mlContext.Transforms.Conversion
+                    .MapValueToKey(outputColumnName: "movieIdEncoded", inputColumnName: nameof(MovieRatingData.MovieId)))
+                .Append(_mlContext.Recommendation().Trainers.MatrixFactorization(
+                    new Microsoft.ML.Trainers.MatrixFactorizationTrainer.Options
+                    {
+                        MatrixColumnIndexColumnName = "userIdEncoded",
+                        MatrixRowIndexColumnName = "movieIdEncoded",
+                        LabelColumnName = nameof(MovieRatingData.Score),
+                        NumberOfIterations = 40,
+                        ApproximationRank = 100
+                    }));
 
-            var model = _mlContext.Recommendation().Trainers.MatrixFactorization(options).Fit(trainingData);
+            // Modell tanítása
+            var model = pipeline.Fit(dataView);
 
             // Felhasználó által már látott filmek
             var seenMovieIds = await _context.ViewHistory
@@ -65,20 +71,20 @@ namespace MovieApp.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            // Előrejelzések minden filmre
-            var predictions = new List<(Movie movie, float score)>();
+            // PredictionEngine létrehozása
             var predictionEngine = _mlContext.Model.CreatePredictionEngine<MovieRatingData, MovieRatingPrediction>(model);
+
+            var predictions = new List<(Movie movie, float score)>();
 
             foreach (var movie in allMovies)
             {
-                // Már látott filmek kihagyása
                 if (seenMovieIds.Contains(movie.Id))
                     continue;
 
                 var prediction = predictionEngine.Predict(new MovieRatingData
                 {
-                    UserId = userId,
-                    MovieId = movie.Id
+                    UserId = (uint)userId,
+                    MovieId = (uint)movie.Id
                 });
 
                 predictions.Add((movie, prediction.Score));
@@ -97,9 +103,9 @@ namespace MovieApp.Services
         // ML.NET input/output osztályok
         private class MovieRatingData
         {
-            [LoadColumn(0)] public float UserId { get; set; }
-            [LoadColumn(1)] public float MovieId { get; set; }
-            [LoadColumn(2)] public float Label { get; set; }
+            [LoadColumn(0)] public uint UserId { get; set; }   // uint, nem float
+            [LoadColumn(1)] public uint MovieId { get; set; }
+            [LoadColumn(2)] public float Score { get; set; }
         }
 
         private class MovieRatingPrediction

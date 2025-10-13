@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieApp.Services;
 using MovieApp.DataContext.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RecommendationController : ControllerBase

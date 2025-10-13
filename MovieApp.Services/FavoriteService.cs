@@ -40,11 +40,13 @@ public class FavoriteService : IFavoriteService
         if (exists)
             return null; 
 
-        var favorite = _mapper.Map<Favorite>(dto);
+        var favorite = _mapper.Map<Favorite >(dto);
         favorite.UserId = userId;
 
         _context.Favorites.Add(favorite);
         await _context.SaveChangesAsync();
+
+        await _context.Entry(favorite).Reference(f => f.Movie).LoadAsync();
 
         return _mapper.Map<FavoriteDto>(favorite);
     }

@@ -92,6 +92,7 @@ public class MovieService : IMovieService
         movie.ReleaseYear = dto.ReleaseYear;
         movie.PosterUrl = dto.PosterUrl;
         _context.MovieGenres.RemoveRange(movie.MovieGenres);
+        movie.Director = dto.Director;
         movie.MovieGenres = dto.GenreIds.Select(id => new MovieGenre
         {
             MovieId = movie.Id,
