@@ -11,6 +11,9 @@ namespace MovieApp.Services
         Task<List<MovieDto>> GetTopRatedMoviesAsync(int topN = 5);
         Task<List<MovieDto>> GetMostFavoritedMoviesAsync(int topN = 5);
         Task<List<UserStatisticsDto>> GetMostActiveUsersAsync(int topN = 5);
+        Task<MovieEngagementStatsDto?> GetMovieEngagementAsync(int movieId);
+        Task<List<GenrePopularityDto>> GetMostPopularGenresAsync(int topN = 5);
+
     }
 
     public class StatisticsService : IStatisticsService
@@ -94,6 +97,38 @@ namespace MovieApp.Services
                     TotalRatings = u.Ratings.Count,
                     TotalFavorites = u.Favorites.Count
                 })
+                .ToListAsync();
+        }
+        public async Task<MovieEngagementStatsDto?> GetMovieEngagementAsync(int movieId)
+        {
+            var movieExists = await _context.Movies.AnyAsync(m => m.Id == movieId);
+            if (!movieExists) return null;
+
+            var favoriteCount = await _context.Favorites.CountAsync(f => f.MovieId == movieId);
+            var viewCount = await _context.ViewHistory.CountAsync(v => v.MovieId == movieId);
+
+            return new MovieEngagementStatsDto
+            {
+                MovieId = movieId,
+                FavoriteCount = favoriteCount,
+                ViewCount = viewCount
+            };
+        }
+
+        public async Task<List<GenrePopularityDto>> GetMostPopularGenresAsync(int topN = 5)
+        {
+            return await _context.Genres
+                .Select(g => new GenrePopularityDto
+                {
+                    GenreId = g.Id,
+                    Name = g.Name,
+                    TotalMovies = g.MovieGenres.Count(),
+                    TotalFavorites = g.MovieGenres.Sum(mg => mg.Movie.Favorites.Count),
+                    TotalViews = g.MovieGenres.Sum(mg => mg.Movie.ViewHistory.Count)
+                })
+                .OrderByDescending(x => x.TotalFavorites + x.TotalViews)
+                .ThenByDescending(x => x.TotalMovies)
+                .Take(topN)
                 .ToListAsync();
         }
     }

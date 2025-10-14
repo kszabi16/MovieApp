@@ -44,5 +44,21 @@ namespace MovieApp.Controllers
             var result = await _statisticsService.GetMostActiveUsersAsync(count);
             return Ok(result);
         }
+
+        [HttpGet("most-active")]
+        public async Task<ActionResult<UserStatisticsDto>> GetMostActive([FromQuery] int count = 1)
+        {
+            var list = await _statisticsService.GetMostActiveUsersAsync(count);
+            if (!list.Any()) return NotFound();
+            return Ok(list.First());
+        }
+
+        
+        [HttpGet("popular-genres")]
+        public async Task<ActionResult<List<GenrePopularityDto>>> GetPopularGenres([FromQuery] int count = 5)
+        {
+            var result = await _statisticsService.GetMostPopularGenresAsync(count);
+            return Ok(result);
+        }
     }
 }

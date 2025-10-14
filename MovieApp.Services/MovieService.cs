@@ -11,6 +11,10 @@ public interface IMovieService
     Task<MovieDto> CreateAsync(MovieCreateDto dto);
     Task<MovieDto?> UpdateAsync(int id, MovieCreateDto dto);
     Task<bool> DeleteAsync(int id);
+    Task<IEnumerable<MovieDto>> GetByGenreAsync(string genre);
+    Task<IEnumerable<MovieDto>> SearchAsync(string query);
+    Task<IEnumerable<MovieDto>> GetTopAsync(int count);
+    Task<IEnumerable<MovieDto>> GetLatestAsync(int count);
 }
 
 public class MovieService : IMovieService
@@ -118,5 +122,55 @@ public class MovieService : IMovieService
         _context.Movies.Remove(movie);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<IEnumerable<MovieDto>> GetByGenreAsync(string genre)
+    {
+        var genreLower = genre.Trim().ToLower();
+        var movies = await _context.Movies
+            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .Include(m => m.Ratings)
+            .Where(m => m.MovieGenres.Any(mg => mg.Genre.Name.ToLower() == genreLower))
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<MovieDto>>(movies);
+    }
+
+    public async Task<IEnumerable<MovieDto>> SearchAsync(string query)
+    {
+        var q = query.Trim();
+        var movies = await _context.Movies
+            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .Where(m => EF.Functions.Like(m.Title, "%" + q + "%") || EF.Functions.Like(m.Description, "%" + q + "%"))
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<MovieDto>>(movies);
+    }
+
+    public async Task<IEnumerable<MovieDto>> GetTopAsync(int count)
+    {
+        if (count <= 0) count = 10;
+
+        var movies = await _context.Movies
+            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .OrderByDescending(m => m.AverageRating)
+            .ThenByDescending(m => m.Ratings.Count)
+            .Take(count)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<MovieDto>>(movies);
+    }
+
+    public async Task<IEnumerable<MovieDto>> GetLatestAsync(int count)
+    {
+        if (count <= 0) count = 10;
+
+        var movies = await _context.Movies
+            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .OrderByDescending(m => m.Id)
+            .Take(count)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<MovieDto>>(movies);
     }
 }

@@ -9,6 +9,7 @@ public interface IRatingService
     Task<IEnumerable<RatingDto>> GetRatingsForMovieAsync(int movieId);
     Task<IEnumerable<RatingDto>> GetRatingsByUserAsync(int userId);
     Task<RatingDto> AddOrUpdateRatingAsync(int userId, CreateRatingDto dto);
+    Task<MovieRatingSummaryDto> GetMovieRatingSummaryAsync(int movieId);
 }
 
 public class RatingService : IRatingService
@@ -79,5 +80,18 @@ public class RatingService : IRatingService
             : 0;
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<MovieRatingSummaryDto> GetMovieRatingSummaryAsync(int movieId)
+    {
+        var query = _context.Ratings.Where(r => r.MovieId == movieId);
+        var count = await query.CountAsync();
+        var avg = count > 0 ? await query.AverageAsync(r => r.Score) : 0.0;
+        return new MovieRatingSummaryDto
+        {
+            MovieId = movieId,
+            AverageRating = Math.Round(avg, 2),
+            RatingCount = count
+        };
     }
 }

@@ -1,16 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieApp.DataContext.Dtos;
+using MovieApp.Services;
 
 [ApiController]
 [Route("api/[controller]")]
 public class MovieController : ControllerBase
 {
     private readonly IMovieService _movieService;
+    private readonly IRatingService _ratingService;
+    private readonly IStatisticsService _statisticsService;
 
-    public MovieController(IMovieService movieService)
+    public MovieController(IMovieService movieService, IRatingService ratingService, IStatisticsService statisticsService)
     {
         _movieService = movieService;
+        _ratingService = ratingService;
+        _statisticsService = statisticsService;
     }
 
     [AllowAnonymous]
@@ -60,5 +65,86 @@ public class MovieController : ControllerBase
             return NotFound();
 
         return NoContent();
+    }
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> Get([FromQuery] string? genre)
+    {
+        if (!string.IsNullOrWhiteSpace(genre))
+        {
+            var byGenre = await _movieService.GetByGenreAsync(genre);
+            return Ok(byGenre);
+        }
+
+        var movies = await _movieService.GetAllAsync();
+        return Ok(movies);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> Search([FromQuery] string? query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return BadRequest("A keresőkifejezés (query) kötelező.");
+
+        var results = await _movieService.SearchAsync(query);
+        return Ok(results);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("top")]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> Top([FromQuery] int count = 10)
+    {
+        if (count <= 0) count = 10;
+        var results = await _movieService.GetTopAsync(count);
+        return Ok(results);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("latest")]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> Latest([FromQuery] int count = 10)
+    {
+        if (count <= 0) count = 10;
+        var results = await _movieService.GetLatestAsync(count);
+        return Ok(results);
+    }
+
+    
+    [AllowAnonymous]
+    [HttpGet("{id}/rating")]
+    public async Task<ActionResult<MovieRatingSummaryDto>> GetRatingSummary(int id)
+    {
+        var summary = await _ratingService.GetMovieRatingSummaryAsync(id);
+        return Ok(summary);
+    }
+
+   
+    [AllowAnonymous]
+    [HttpGet("most-favorited")]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> MostFavorited([FromQuery] int count = 10)
+    {
+        if (count <= 0) count = 10;
+        var results = await _statisticsService.GetMostFavoritedMoviesAsync(count);
+        return Ok(results);
+    }
+
+    
+    [AllowAnonymous]
+    [HttpGet("most-viewed")]
+    public async Task<ActionResult<IEnumerable<MovieDto>>> MostViewed([FromQuery] int count = 10)
+    {
+        if (count <= 0) count = 10;
+        var results = await _statisticsService.GetMostViewedMoviesAsync(count);
+        return Ok(results);
+    }
+
+   
+    [AllowAnonymous]
+    [HttpGet("{id}/stats")]
+    public async Task<ActionResult<MovieEngagementStatsDto>> MovieStats(int id)
+    {
+        var stats = await _statisticsService.GetMovieEngagementAsync(id);
+        if (stats == null) return NotFound();
+        return Ok(stats);
     }
 }

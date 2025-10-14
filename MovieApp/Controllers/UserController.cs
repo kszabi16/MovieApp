@@ -13,10 +13,19 @@ namespace MovieApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IRatingService _ratingService;
+        private readonly IFavoriteService _favoriteService;
+        private readonly IViewHistoryService _viewHistoryService;
+        private readonly RecommendationService _recommendationService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IRatingService ratingService, IFavoriteService favoriteService, 
+            IViewHistoryService viewHistoryService, RecommendationService recommendationService)
         {
             _userService = userService;
+            _ratingService = ratingService;
+            _favoriteService = favoriteService;
+            _viewHistoryService = viewHistoryService;
+            _recommendationService = recommendationService;
         }
 
         [Authorize]
@@ -58,6 +67,43 @@ namespace MovieApp.Controllers
             if (!result)
                 return NotFound();
             return NoContent();
+        }
+        
+        [Authorize]
+        [HttpGet("{id}/ratings")]
+        public async Task<ActionResult<IEnumerable<RatingDto>>> GetUserRatings(int id)
+        {
+            var ratings = await _ratingService.GetRatingsByUserAsync(id);
+            return Ok(ratings);
+        }
+
+       
+        [Authorize]
+        [HttpGet("{id}/favorites")]
+        public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetUserFavorites(int id)
+        {
+            var favorites = await _favoriteService.GetFavoritesByUserAsync(id);
+            return Ok(favorites);
+        }
+
+       
+        [Authorize]
+        [HttpGet("{id}/history")]
+        public async Task<ActionResult<IEnumerable<ViewHistoryDto>>> GetUserHistory(int id)
+        {
+            var history = await _viewHistoryService.GetUserHistoryAsync(id);
+            return Ok(history);
+        }
+
+        
+        [Authorize]
+        [HttpGet("{id}/recommendations")]
+        public async Task<ActionResult<IEnumerable<MovieDto>>> GetUserRecommendations(int id, [FromQuery] int count = 5)
+        {
+            var recs = await _recommendationService.GetRecommendationsForUserAsync(id, count);
+            if (recs == null || !recs.Any())
+                return NotFound("Nem található ajánlás ehhez a felhasználóhoz.");
+            return Ok(recs);
         }
     }
 }
