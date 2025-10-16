@@ -69,41 +69,5 @@ namespace MovieApp.Controllers
             return NoContent();
         }
         
-        [Authorize]
-        [HttpGet("{id}/ratings")]
-        public async Task<ActionResult<IEnumerable<RatingDto>>> GetUserRatings(int id)
-        {
-            var ratings = await _ratingService.GetRatingsByUserAsync(id);
-            return Ok(ratings);
-        }
-
-       
-        [Authorize]
-        [HttpGet("{id}/favorites")]
-        public async Task<ActionResult<IEnumerable<FavoriteDto>>> GetUserFavorites(int id)
-        {
-            var favorites = await _favoriteService.GetFavoritesByUserAsync(id);
-            return Ok(favorites);
-        }
-
-       
-        [Authorize]
-        [HttpGet("{id}/history")]
-        public async Task<ActionResult<IEnumerable<ViewHistoryDto>>> GetUserHistory(int id)
-        {
-            var history = await _viewHistoryService.GetUserHistoryAsync(id);
-            return Ok(history);
-        }
-
-        
-        [Authorize]
-        [HttpGet("{id}/recommendations")]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetUserRecommendations(int id, [FromQuery] int count = 5)
-        {
-            var recs = await _recommendationService.GetRecommendationsForUserAsync(id, count);
-            if (recs == null || !recs.Any())
-                return NotFound("Nem található ajánlás ehhez a felhasználóhoz.");
-            return Ok(recs);
-        }
     }
 }

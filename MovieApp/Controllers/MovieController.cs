@@ -92,15 +92,6 @@ public class MovieController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("top")]
-    public async Task<ActionResult<IEnumerable<MovieDto>>> Top([FromQuery] int count = 10)
-    {
-        if (count <= 0) count = 10;
-        var results = await _movieService.GetTopAsync(count);
-        return Ok(results);
-    }
-
-    [AllowAnonymous]
     [HttpGet("latest")]
     public async Task<ActionResult<IEnumerable<MovieDto>>> Latest([FromQuery] int count = 10)
     {
@@ -118,27 +109,7 @@ public class MovieController : ControllerBase
         return Ok(summary);
     }
 
-   
-    [AllowAnonymous]
-    [HttpGet("most-favorited")]
-    public async Task<ActionResult<IEnumerable<MovieDto>>> MostFavorited([FromQuery] int count = 10)
-    {
-        if (count <= 0) count = 10;
-        var results = await _statisticsService.GetMostFavoritedMoviesAsync(count);
-        return Ok(results);
-    }
 
-    
-    [AllowAnonymous]
-    [HttpGet("most-viewed")]
-    public async Task<ActionResult<IEnumerable<MovieDto>>> MostViewed([FromQuery] int count = 10)
-    {
-        if (count <= 0) count = 10;
-        var results = await _statisticsService.GetMostViewedMoviesAsync(count);
-        return Ok(results);
-    }
-
-   
     [AllowAnonymous]
     [HttpGet("{id}/stats")]
     public async Task<ActionResult<MovieEngagementStatsDto>> MovieStats(int id)

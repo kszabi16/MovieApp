@@ -13,7 +13,6 @@ public interface IMovieService
     Task<bool> DeleteAsync(int id);
     Task<IEnumerable<MovieDto>> GetByGenreAsync(string genre);
     Task<IEnumerable<MovieDto>> SearchAsync(string query);
-    Task<IEnumerable<MovieDto>> GetTopAsync(int count);
     Task<IEnumerable<MovieDto>> GetLatestAsync(int count);
 }
 
@@ -147,19 +146,6 @@ public class MovieService : IMovieService
         return _mapper.Map<IEnumerable<MovieDto>>(movies);
     }
 
-    public async Task<IEnumerable<MovieDto>> GetTopAsync(int count)
-    {
-        if (count <= 0) count = 10;
-
-        var movies = await _context.Movies
-            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
-            .OrderByDescending(m => m.AverageRating)
-            .ThenByDescending(m => m.Ratings.Count)
-            .Take(count)
-            .ToListAsync();
-
-        return _mapper.Map<IEnumerable<MovieDto>>(movies);
-    }
 
     public async Task<IEnumerable<MovieDto>> GetLatestAsync(int count)
     {
