@@ -8,6 +8,7 @@ public interface IViewHistoryService
 {
     Task<IEnumerable<ViewHistoryDto>> GetUserHistoryAsync(int userId);
     Task<ViewHistoryDto> AddViewAsync(int userId, int movieId);
+    Task<bool> RemoveViewAsync(int userId, int movieId);
 }
 
 public class ViewHistoryService : IViewHistoryService
@@ -47,5 +48,22 @@ public class ViewHistoryService : IViewHistoryService
         await _context.Entry(view).Reference(f => f.Movie).LoadAsync();
 
         return _mapper.Map<ViewHistoryDto>(view);
+    }
+
+    public async Task<bool> RemoveViewAsync(int userId, int movieId)
+    {
+        var historyEntry = await _context.ViewHistory
+            .FirstOrDefaultAsync(vh => vh.UserId == userId && vh.MovieId == movieId);
+
+        if (historyEntry == null)
+        {
+            return false;
+        }
+
+        _context.ViewHistory.Remove(historyEntry);
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }

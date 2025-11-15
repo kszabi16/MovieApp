@@ -41,7 +41,7 @@ namespace MovieApp.Services
                 Username = registerDto.Username,
                 Email = registerDto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
-                Role = RoleType.Admin, //Admin regisztráció teszteléshez
+                Role = RoleType.User, 
             };
 
             _context.Users.Add(user);

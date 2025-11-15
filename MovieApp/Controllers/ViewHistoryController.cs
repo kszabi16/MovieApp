@@ -27,4 +27,17 @@ public class ViewHistoryController : ControllerBase
         var result = await _viewHistoryService.AddViewAsync(userId, movieId);
         return Ok(result);
     }
+
+    [HttpDelete("{userId}/{movieId}")]
+    public async Task<IActionResult> RemoveView(int userId, int movieId)
+    {
+        var success = await _viewHistoryService.RemoveViewAsync(userId, movieId);
+
+        if (!success)
+        {
+            return NotFound("A törölni kívánt elem nem található.");
+        }
+
+        return NoContent();
+    }
 }
