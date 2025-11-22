@@ -32,17 +32,20 @@ namespace MovieApp.Services
                                ? src.MovieGenres.Select(mg => mg.Genre.Name).ToList()
                                : new System.Collections.Generic.List<string>()));
 
-           
-            CreateMap<MovieCreateDto, Movie>()
-                .ForMember(dest => dest.MovieGenres,
-                           opt => opt.MapFrom(src =>
-                               src.GenreIds != null
-                                   ? src.GenreIds.Select(id => new MovieGenre { GenreId = id }).ToList()
-                                   : new System.Collections.Generic.List<MovieGenre>()))
-                .ForMember(dest => dest.AverageRating, opt => opt.Ignore()) // számítás külön
-                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-     
+            CreateMap<MovieCreateDto, Movie>()
+    .ForMember(dest => dest.MovieGenres,
+        opt => opt.MapFrom(src =>
+            src.GenreIds != null
+                ? src.GenreIds.Select(id => new MovieGenre { GenreId = id }).ToList()
+                : new List<MovieGenre>()))
+    .ForMember(dest => dest.AverageRating, opt => opt.Ignore())
+    .ForMember(dest => dest.Id, opt => opt.Ignore())
+    .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.PosterUrl));
+
+
+
+
             CreateMap<Genre, GenreDto>().ReverseMap();
 
         

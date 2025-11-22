@@ -38,7 +38,7 @@ public class MovieController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<ActionResult<MovieDto>> Create([FromBody] MovieCreateDto dto)
     {
         var created = await _movieService.CreateAsync(dto);
