@@ -23,6 +23,7 @@ namespace MovieApp.DataContext.Dtos
     {
         public int Id { get; set; }
         public string Username { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
         public string Role { get; set; }
         public DateTime CreatedAt { get; set; }
