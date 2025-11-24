@@ -45,7 +45,7 @@ namespace MovieApp.DataContext.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Favorites");
+                    b.ToTable("Favorites", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.Genre", b =>
@@ -65,7 +65,7 @@ namespace MovieApp.DataContext.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
 
                     b.HasData(
                         new
@@ -126,7 +126,7 @@ namespace MovieApp.DataContext.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Movies");
+                    b.ToTable("Movies", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.MovieGenre", b =>
@@ -141,7 +141,7 @@ namespace MovieApp.DataContext.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("MovieGenres");
+                    b.ToTable("MovieGenres", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.Rating", b =>
@@ -170,7 +170,7 @@ namespace MovieApp.DataContext.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Ratings");
+                    b.ToTable("Ratings", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.User", b =>
@@ -204,7 +204,7 @@ namespace MovieApp.DataContext.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.ViewHistory", b =>
@@ -230,7 +230,7 @@ namespace MovieApp.DataContext.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ViewHistory");
+                    b.ToTable("ViewHistory", (string)null);
                 });
 
             modelBuilder.Entity("MovieApp.DataContext.Entities.Favorite", b =>

@@ -18,6 +18,7 @@ namespace MovieApp.DataContext.Dtos
         public double AverageRating { get; set; }
 
         public List<string> Genres { get; set; } = new();
+        public List<int> GenreIds { get; set; } = new();
     }
 
     public class MovieCreateDto
@@ -28,6 +29,7 @@ namespace MovieApp.DataContext.Dtos
         public string? PosterUrl { get; set; }
         public string Director { get; set; } = string.Empty;
 
-        public List<int> GenreIds { get; set; } = new();
+        public List<int> GenreIds { get; set; } 
+
     }
 }

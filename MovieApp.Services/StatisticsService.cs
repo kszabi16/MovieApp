@@ -2,13 +2,15 @@
 using MovieApp.DataContext;
 using MovieApp.DataContext.Context;
 using MovieApp.DataContext.Dtos;
+using MovieApp.DataContext.Entities;
+using AutoMapper;
 
 namespace MovieApp.Services
 {
     public interface IStatisticsService
     {
         Task<List<MovieDto>> GetMostViewedMoviesAsync(int topN = 5);
-        Task<List<MovieDto>> GetTopRatedMoviesAsync(int topN = 5);
+        Task<List<TopRatedMovieDto>> GetTopRatedMoviesAsync(int topN = 5);
         Task<List<MovieDto>> GetMostFavoritedMoviesAsync(int topN = 5);
         Task<List<UserStatisticsDto>> GetMostActiveUsersAsync(int topN = 5);
         Task<MovieEngagementStatsDto?> GetMovieEngagementAsync(int movieId);
@@ -19,10 +21,12 @@ namespace MovieApp.Services
     public class StatisticsService : IStatisticsService
     {
         private readonly MovieAppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public StatisticsService(MovieAppDbContext context)
+        public StatisticsService(MovieAppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<List<MovieDto>> GetMostViewedMoviesAsync(int topN = 5)
@@ -44,24 +48,25 @@ namespace MovieApp.Services
                 .ToListAsync();
         }
 
-        public async Task<List<MovieDto>> GetTopRatedMoviesAsync(int topN = 5)
+
+
+
+        public async Task<List<TopRatedMovieDto>> GetTopRatedMoviesAsync(int topN = 10)
         {
-            return await _context.Movies
-                .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
-                .OrderByDescending(m => m.AverageRating)
+            var movies = await _context.Movies
+                .Include(m => m.Ratings)
+                .Include(m => m.MovieGenres)
+                    .ThenInclude(mg => mg.Genre)
+                .OrderByDescending(m =>
+                    m.Ratings.Count > 0
+                        ? m.Ratings.Average(r => r.Score)
+                        : 0
+                )
                 .ThenByDescending(m => m.Ratings.Count)
                 .Take(topN)
-                .Select(m => new MovieDto
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Description = m.Description,
-                    ReleaseYear = m.ReleaseYear,
-                    PosterUrl = m.PosterUrl,
-                    AverageRating = m.AverageRating,
-                    Genres = m.MovieGenres.Select(g => g.Genre.Name).ToList()
-                })
                 .ToListAsync();
+
+            return _mapper.Map<List<TopRatedMovieDto>>(movies);
         }
 
         public async Task<List<MovieDto>> GetMostFavoritedMoviesAsync(int topN = 5)

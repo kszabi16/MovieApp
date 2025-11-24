@@ -25,12 +25,12 @@ namespace MovieApp.Services
            
             CreateMap<LoginDto, User>().ForAllMembers(opt => opt.Ignore());
 
-          
+
             CreateMap<Movie, MovieDto>()
                 .ForMember(dest => dest.Genres,
-                           opt => opt.MapFrom(src => src.MovieGenres != null
-                               ? src.MovieGenres.Select(mg => mg.Genre.Name).ToList()
-                               : new System.Collections.Generic.List<string>()));
+                    opt => opt.MapFrom(src => src.MovieGenres.Select(mg => mg.Genre.Name)))
+                .ForMember(dest => dest.GenreIds,
+                    opt => opt.MapFrom(src => src.MovieGenres.Select(mg => mg.GenreId)));
 
 
             CreateMap<MovieCreateDto, Movie>()
@@ -73,8 +73,16 @@ namespace MovieApp.Services
             CreateMap<ViewHistoryDto, ViewHistory>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-           
-            
+            CreateMap<Movie, TopRatedMovieDto>()
+             .ForMember(dest => dest.Genres,
+                 opt => opt.MapFrom(src => src.MovieGenres.Select(mg => mg.Genre.Name)))
+             .ForMember(dest => dest.AverageRating,
+                 opt => opt.MapFrom(src =>
+                     src.Ratings != null && src.Ratings.Count > 0
+                         ? Math.Round(src.Ratings.Average(r => r.Score), 1)
+                         : 0.0
+                 ));
+
         }
     }
 }

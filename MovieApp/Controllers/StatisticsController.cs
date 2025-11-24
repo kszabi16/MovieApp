@@ -25,8 +25,9 @@ namespace MovieApp.Controllers
         }
 
         [HttpGet("top-rated")]
-        public async Task<ActionResult<List<MovieDto>>> GetTopRatedMovies([FromQuery] int count = 5)
+        public async Task<ActionResult<List<TopRatedMovieDto>>> GetTopRatedMovies([FromQuery] int count = 5)
         {
+           
             var result = await _statisticsService.GetTopRatedMoviesAsync(count);
             return Ok(result);
         }
