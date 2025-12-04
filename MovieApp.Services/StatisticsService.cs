@@ -88,21 +88,26 @@ namespace MovieApp.Services
                 .ToListAsync();
         }
 
-        public async Task<List<UserStatisticsDto>> GetMostActiveUsersAsync(int topN = 5)
+        public async Task<List<UserStatisticsDto>> GetMostActiveUsersAsync(int count)
         {
-            return await _context.Users
-                .OrderByDescending(u => u.ViewHistory.Count + u.Ratings.Count + u.Favorites.Count)
-                .Take(topN)
+            var query = _context.Users
+                .AsNoTracking()
+                .Where(u => u.Role != RoleType.Admin)
                 .Select(u => new UserStatisticsDto
                 {
                     UserId = u.Id,
                     Username = u.Username,
-                    Email = u.Email,
-                    TotalViews = u.ViewHistory.Count,
-                    TotalRatings = u.Ratings.Count,
-                    TotalFavorites = u.Favorites.Count
-                })
+                    TotalRatings = u.Ratings.Count(),
+                    TotalFavorites = u.Favorites.Count(),
+                    TotalViews = u.ViewHistory.Count()
+                });
+
+            var result = await query
+                .OrderByDescending(s => s.TotalRatings * 3 + s.TotalFavorites * 2 + s.TotalViews)
+                .Take(count)
                 .ToListAsync();
+
+            return result;
         }
         public async Task<MovieEngagementStatsDto?> GetMovieEngagementAsync(int movieId)
         {
